@@ -216,8 +216,8 @@ Launches default browser and opens the doc's url."
 Keywords include all AHK's event handlers, functions, and CONSTANTS."
   (interactive)
   (let ((posEnd (point))
-         (meat (thing-at-point 'symbol))
-         maxMatchResult)
+        (meat (thing-at-point 'symbol))
+        maxMatchResult)
 
     (when (not meat) (setq meat ""))
 
@@ -232,8 +232,7 @@ Keywords include all AHK's event handlers, functions, and CONSTANTS."
           (t (message "Making completion list...")
              (with-output-to-temp-buffer "*Completions*"
                (display-completion-list
-                (all-completions meat xahk-kwdList)
-                meat))
+                (all-completions meat xahk-kwdList)))
              (message "Making completion list...%s" "done")))))
 
 ;; clear memory
