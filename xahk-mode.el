@@ -1,40 +1,47 @@
-;;; xahk-mode.el --- Major mode for editing AHK (AutoHotkey) scripts. -*- coding: utf-8 -*-
+;;; xahk-mode.el --- Major mode for editing AutoHotkey scripts.
 
-;; Copyright © 2008, 2009, 2010, 2011, 2012 by Xah Lee
+;; Copyright © 2008-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Created: 2010-01-09
-;; Keywords: ahk, AutoHotkey, hotkey, keyboard shortcut, automation
+;; Version: 1.3.0
+;; Created: 09 Jan 2010
+;; Keywords: languages
+;; Homepage: http://xahlee.info/mswin/emacs_autohotkey_mode.html
 
 ;; You can redistribute this program and/or modify it. Please give credit and link. Thanks.
 
-;;; DESCRIPTION
+;;; Commentary:
 
-;; A major mode for editing AutoHotkey (AHK) script. 
+;; A major mode for editing AutoHotkey (AHK) script.
+
 ;; for download location and documentation, see:
 ;; http://xahlee.info/mswin/emacs_autohotkey_mode.html
 
-;; donate $3 please. Paypal to xah@xahlee.org , thanks.
+;; Like it?
+;; Buy Xah Emacs Tutorial
+;; http://ergoemacs.org/emacs/buy_xah_emacs_tutorial.html
 
-;;; INSTALL
+;;; INSTALL:
 
-;; Open the file, then type “Alt+x eval-buffer”. You are done. Open
-;; any ahk script, then type “Alt+x xahk-mode”, you'll see the
-;; source code syntax colored.
+;; Open the file, then type “Alt+x eval-buffer”. You are done. Open any AHK script, then type “Alt+x xahk-mode”, you'll see the source code syntax colored.
 
-;; To have emacs automatically load the file when it restarts, and
-;; automatically use the mode when opening files ending in “.ahk”, do this:
+;; To make emacs load it on startup:
 
-;; ① Put the file 〔xahk-mode.el〕 in the dir 〔~/.emacs.d/〕
-;; ② Put the following lines in your emacs init file (usually at 〔~/.emacs〕).
+;; 1, Put the file 〔xahk-mode.el〕 in the dir 〔~/.emacs.d/lisp/〕 (create the dir if it doesn't exist)
+;; 2, Put the following lines in your emacs init file (usually at 〔~/.emacs〕).
+
+;; (add-to-list 'load-path "~/.emacs.d/lisp/")
 ;; (autoload 'xahk-mode "xahk-mode" "Load xahk-mode for editing AutoHotkey scripts." t)
-;; (add-to-list 'auto-mode-alist '("\\.ahk\\'" . xahk-mode))
-;; (defalias 'ahk-mode 'xahk-mode) ; make it easier to remember.
 
-;; Then, restart emacs.
+;; Restart emacs.
+
+;; • file ending in .ahk will be opened in xahk-mode.
+;; • You can call xahk-mode anytime
+;; • ahk-mode is setup as a alias to xahk-mode
 
 ;;; HISTORY
 
+;; version 1.3.0, 2015-05-04 major refactor. Submit to MELPA.
 ;; version 1.2.2, 2012-05-21 modified syntax table so “_” is part of word.
 ;; version 1.2.1, 2011-10-15 Minor changes. No visible behavior change.
 ;; version 1.2, 2010-02-17 fixed a defect where if source contains “"C:\"”, everything after is badly syntax colored. Thanks to “xinlu.h” and “iain.tuddenham”. Detail at http://code.google.com/p/ergoemacs/issues/detail?id=66
@@ -46,7 +53,7 @@
 (require 'thingatpt )
 
 (defconst xahk-mode-version "")
-(setq xahk-mode-version "1.2.2")
+(setq xahk-mode-version "1.3.0")
 
 (defgroup xahk-mode nil
   "Major mode for editing AutoHotkey script."
@@ -73,6 +80,7 @@
   (setq xahk-mode-map (make-sparse-keymap))
   (define-key xahk-mode-map (kbd "C-c C-r") 'xahk-lookup-ahk-ref)
   (define-key xahk-mode-map (kbd "M-TAB") 'xahk-complete-symbol)
+  (define-key xahk-mode-map (kbd "TAB") 'xahk-complete-symbol)
   (define-key xahk-mode-map [remap comment-dwim] 'xahk-comment-dwim)
 
   (define-key xahk-mode-map [menu-bar] (make-sparse-keymap))
@@ -128,10 +136,7 @@
              "Author: Xah Lee\n\n"
              "Version: " xahk-mode-version "\n\n"
              "To see inline documentation, type “Alt+x `describe-mode'” while you are in xahk-mode.\n\n"
-             "Home page: URL `http://xahlee.info/mswin/emacs_autohotkey_mode.html' \n\n")
-     )
-    )
-  )
+             "Home page: URL `http://xahlee.info/mswin/emacs_autohotkey_mode.html' \n\n"))))
 
 ;; implementation using “newcomment.el”.
 (defun xahk-comment-dwim (arg)
@@ -146,18 +151,15 @@ For detail, see `comment-dwim'."
   "Look up current word in AutoHotkey's reference doc.
 If a there is a text selection (a phrase), lookup that phrase.
 Launches default browser and opens the doc's url."
- (interactive)
- (let (myword myurl)
-   (setq myword
-         (if (region-active-p)
-             (buffer-substring-no-properties (region-beginning) (region-end))
-           (thing-at-point 'symbol)))
-
-  (setq myword (replace-regexp-in-string " " "%20" myword))
-  (setq myurl (concat "http://www.autohotkey.com/docs/commands/" myword ".htm" ))
-
-  (browse-url myurl)
-   ))
+  (interactive)
+  (let (myword myurl)
+    (setq myword
+          (if (region-active-p)
+              (buffer-substring-no-properties (region-beginning) (region-end))
+            (thing-at-point 'symbol)))
+    (setq myword (replace-regexp-in-string " " "%20" myword))
+    (setq myurl (concat "http://www.autohotkey.com/docs/commands/" myword ".htm" ))
+    (browse-url myurl)))
 
 ;;; font-lock
 
@@ -174,29 +176,29 @@ Launches default browser and opens the doc's url."
   "AHK lang keywords.")
 
 (defvar xahk-variables
-'("A_AhkPath" "A_AhkVersion" "A_AppData" "A_AppDataCommon" "A_AutoTrim" "A_BatchLines" "A_CaretX" "A_CaretY" "A_ComputerName" "A_ControlDelay" "A_Cursor" "A_DD" "A_DDD" "A_DDDD" "A_DefaultMouseSpeed" "A_Desktop" "A_DesktopCommon" "A_DetectHiddenText" "A_DetectHiddenWindows" "A_EndChar" "A_EventInfo" "A_ExitReason" "A_FormatFloat" "A_FormatInteger" "A_Gui" "A_GuiEvent" "A_GuiControl" "A_GuiControlEvent" "A_GuiHeight" "A_GuiWidth" "A_GuiX" "A_GuiY" "A_Hour" "A_IconFile" "A_IconHidden" "A_IconNumber" "A_IconTip" "A_Index" "A_IPAddress1" "A_IPAddress2" "A_IPAddress3" "A_IPAddress4" "A_ISAdmin" "A_IsCompiled" "A_IsCritical" "A_IsPaused" "A_IsSuspended" "A_KeyDelay" "A_Language" "A_LastError" "A_LineFile" "A_LineNumber" "A_LoopField" "A_LoopFileAttrib" "A_LoopFileDir" "A_LoopFileExt" "A_LoopFileFullPath" "A_LoopFileLongPath" "A_LoopFileName" "A_LoopFileShortName" "A_LoopFileShortPath" "A_LoopFileSize" "A_LoopFileSizeKB" "A_LoopFileSizeMB" "A_LoopFileTimeAccessed" "A_LoopFileTimeCreated" "A_LoopFileTimeModified" "A_LoopReadLine" "A_LoopRegKey" "A_LoopRegName" "A_LoopRegSubkey" "A_LoopRegTimeModified" "A_LoopRegType" "A_MDAY" "A_Min" "A_MM" "A_MMM" "A_MMMM" "A_Mon" "A_MouseDelay" "A_MSec" "A_MyDocuments" "A_Now" "A_NowUTC" "A_NumBatchLines" "A_OSType" "A_OSVersion" "A_PriorHotkey" "A_ProgramFiles" "A_Programs" "A_ProgramsCommon" "A_ScreenHeight" "A_ScreenWidth" "A_ScriptDir" "A_ScriptFullPath" "A_ScriptName" "A_Sec" "A_Space" "A_StartMenu" "A_StartMenuCommon" "A_Startup" "A_StartupCommon" "A_StringCaseSense" "A_Tab" "A_Temp" "A_ThisFunc" "A_ThisHotkey" "A_ThisLabel" "A_ThisMenu" "A_ThisMenuItem" "A_ThisMenuItemPos" "A_TickCount" "A_TimeIdle" "A_TimeIdlePhysical" "A_TimeSincePriorHotkey" "A_TimeSinceThisHotkey" "A_TitleMatchMode" "A_TitleMatchModeSpeed" "A_UserName" "A_WDay" "A_WinDelay" "A_WinDir" "A_WorkingDir" "A_YDay" "A_YEAR" "A_YWeek" "A_YYYY" "Clipboard" "ClipboardAll" "ComSpec" "ErrorLevel" "ProgramFiles" "True" "False" )  
+'("A_AhkPath" "A_AhkVersion" "A_AppData" "A_AppDataCommon" "A_AutoTrim" "A_BatchLines" "A_CaretX" "A_CaretY" "A_ComputerName" "A_ControlDelay" "A_Cursor" "A_DD" "A_DDD" "A_DDDD" "A_DefaultMouseSpeed" "A_Desktop" "A_DesktopCommon" "A_DetectHiddenText" "A_DetectHiddenWindows" "A_EndChar" "A_EventInfo" "A_ExitReason" "A_FormatFloat" "A_FormatInteger" "A_Gui" "A_GuiEvent" "A_GuiControl" "A_GuiControlEvent" "A_GuiHeight" "A_GuiWidth" "A_GuiX" "A_GuiY" "A_Hour" "A_IconFile" "A_IconHidden" "A_IconNumber" "A_IconTip" "A_Index" "A_IPAddress1" "A_IPAddress2" "A_IPAddress3" "A_IPAddress4" "A_ISAdmin" "A_IsCompiled" "A_IsCritical" "A_IsPaused" "A_IsSuspended" "A_KeyDelay" "A_Language" "A_LastError" "A_LineFile" "A_LineNumber" "A_LoopField" "A_LoopFileAttrib" "A_LoopFileDir" "A_LoopFileExt" "A_LoopFileFullPath" "A_LoopFileLongPath" "A_LoopFileName" "A_LoopFileShortName" "A_LoopFileShortPath" "A_LoopFileSize" "A_LoopFileSizeKB" "A_LoopFileSizeMB" "A_LoopFileTimeAccessed" "A_LoopFileTimeCreated" "A_LoopFileTimeModified" "A_LoopReadLine" "A_LoopRegKey" "A_LoopRegName" "A_LoopRegSubkey" "A_LoopRegTimeModified" "A_LoopRegType" "A_MDAY" "A_Min" "A_MM" "A_MMM" "A_MMMM" "A_Mon" "A_MouseDelay" "A_MSec" "A_MyDocuments" "A_Now" "A_NowUTC" "A_NumBatchLines" "A_OSType" "A_OSVersion" "A_PriorHotkey" "A_ProgramFiles" "A_Programs" "A_ProgramsCommon" "A_ScreenHeight" "A_ScreenWidth" "A_ScriptDir" "A_ScriptFullPath" "A_ScriptName" "A_Sec" "A_Space" "A_StartMenu" "A_StartMenuCommon" "A_Startup" "A_StartupCommon" "A_StringCaseSense" "A_Tab" "A_Temp" "A_ThisFunc" "A_ThisHotkey" "A_ThisLabel" "A_ThisMenu" "A_ThisMenuItem" "A_ThisMenuItemPos" "A_TickCount" "A_TimeIdle" "A_TimeIdlePhysical" "A_TimeSincePriorHotkey" "A_TimeSinceThisHotkey" "A_TitleMatchMode" "A_TitleMatchModeSpeed" "A_UserName" "A_WDay" "A_WinDelay" "A_WinDir" "A_WorkingDir" "A_YDay" "A_YEAR" "A_YWeek" "A_YYYY" "Clipboard" "ClipboardAll" "ComSpec" "ErrorLevel" "ProgramFiles" "True" "False" )
   "AHK variables.")
 
 (defvar xahk-keys
   '("Alt" "AltDown" "AltUp" "AppsKey" "BS" "BackSpace" "Browser_Back" "Browser_Favorites" "Browser_Forward" "Browser_Home" "Browser_Refresh" "Browser_Search" "Browser_Stop" "CapsLock" "Control" "Ctrl" "CtrlBreak" "CtrlDown" "CtrlUp" "Del" "Delete" "Down" "End" "Enter" "Esc" "Escape" "F1" "F10" "F11" "F12" "F13" "F14" "F15" "F16" "F17" "F18" "F19" "F2" "F20" "F21" "F22" "F23" "F24" "F3" "F4" "F5" "F6" "F7" "F8" "F9" "Home" "Ins" "Insert" "Joy1" "Joy10" "Joy11" "Joy12" "Joy13" "Joy14" "Joy15" "Joy16" "Joy17" "Joy18" "Joy19" "Joy2" "Joy20" "Joy21" "Joy22" "Joy23" "Joy24" "Joy25" "Joy26" "Joy27" "Joy28" "Joy29" "Joy3" "Joy30" "Joy31" "Joy32" "Joy4" "Joy5" "Joy6" "Joy7" "Joy8" "Joy9" "JoyAxes" "JoyButtons" "JoyInfo" "JoyName" "JoyPOV" "JoyR" "JoyU" "JoyV" "JoyX" "JoyY" "JoyZ" "LAlt" "LButton" "LControl" "LCtrl" "LShift" "LWin" "LWinDown" "LWinUp" "Launch_App1" "Launch_App2" "Launch_Mail" "Launch_Media" "Left" "MButton" "Media_Next" "Media_Play_Pause" "Media_Prev" "Media_Stop" "NumLock" "Numpad0" "Numpad1" "Numpad2" "Numpad3" "Numpad4" "Numpad5" "Numpad6" "Numpad7" "Numpad8" "Numpad9" "NumpadAdd" "NumpadClear" "NumpadDel" "NumpadDiv" "NumpadDot" "NumpadDown" "NumpadEnd" "NumpadEnter" "NumpadHome" "NumpadIns" "NumpadLeft" "NumpadMult" "NumpadPgdn" "NumpadPgup" "NumpadRight" "NumpadSub" "NumpadUp" "PGDN" "PGUP" "Pause" "PrintScreen" "RAlt" "RButton" "RControl" "RCtrl" "RShift" "RWin" "RWinDown" "RWinUp" "Right" "ScrollLock" "Shift" "ShiftDown" "ShiftUp" "Space" "Tab" "Up" "Volume_Down" "Volume_Mute" "Volume_Up" "WheelDown" "WheelLeft" "WheelRight" "WheelUp" "XButton1" "XButton2")
   "AHK keywords for keys.")
 
-(defvar xahk-commands-regexp (regexp-opt xahk-commands 'words))
-(defvar xahk-functions-regexp (regexp-opt xahk-functions 'words))
-(defvar xahk-keywords-regexp (regexp-opt xahk-keywords 'words))
-(defvar xahk-variables-regexp (regexp-opt xahk-variables 'words))
-(defvar xahk-keys-regexp (regexp-opt xahk-keys 'words))
-
 (defvar xahk-font-lock-keywords nil )
-(setq xahk-font-lock-keywords
-  `(
-    (,xahk-commands-regexp . xahk-mode-command-name-face)
-    (,xahk-functions-regexp . font-lock-function-name-face)
-    (,xahk-keywords-regexp . font-lock-keyword-face)
-    (,xahk-variables-regexp . font-lock-variable-name-face)
-    (,xahk-keys-regexp . font-lock-constant-face)
-;; note: order matters
-))
+(let (
+      (xahk-commands-regexp (regexp-opt xahk-commands 'words))
+      (xahk-functions-regexp (regexp-opt xahk-functions 'words))
+      (xahk-keywords-regexp (regexp-opt xahk-keywords 'words))
+      (xahk-variables-regexp (regexp-opt xahk-variables 'words))
+      (xahk-keys-regexp (regexp-opt xahk-keys 'words)))
+  (setq xahk-font-lock-keywords
+        `(
+          (,xahk-commands-regexp . xahk-mode-command-name-face)
+          (,xahk-functions-regexp . font-lock-function-name-face)
+          (,xahk-keywords-regexp . font-lock-keyword-face)
+          (,xahk-variables-regexp . font-lock-variable-name-face)
+          (,xahk-keys-regexp . font-lock-constant-face)
+          ;; note: order matters
+          )))
 
 ;; keyword completion
 (defvar xahk-kwdList nil "AHK keywords.")
@@ -241,6 +243,7 @@ Keywords include all AHK's event handlers, functions, and CONSTANTS."
 (setq xahk-variables nil)
 (setq xahk-keys nil)
 
+;;;###autoload
 (defun xahk-mode ()
   "Major mode for editing AutoHotkey script (AHK).
 
@@ -264,13 +267,11 @@ Complete documentation at URL `http://xahlee.info/mswin/emacs_autohotkey_mode.ht
   (make-local-variable 'font-lock-defaults)
   (setq font-lock-defaults '((xahk-font-lock-keywords) nil t))
 
-  ;; clear memory
-(setq xahk-commands-regexp nil)
-(setq xahk-functions-regexp nil)
-(setq xahk-keywords-regexp nil)
-(setq xahk-variables-regexp nil)
-(setq xahk-keys-regexp nil)
-
   (run-mode-hooks 'xahk-mode-hook))
 
+(defalias 'ahk-mode 'xahk-mode)
+(add-to-list 'auto-mode-alist '("\\.ahk\\'" . xahk-mode))
+
 (provide 'xahk-mode)
+
+;;; xahk-mode.el ends here
