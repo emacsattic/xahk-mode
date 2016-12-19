@@ -1,10 +1,11 @@
-;;; xahk-mode.el --- Major mode for editing AutoHotkey scripts.
+;;; xahk-mode.el --- Major mode for editing AutoHotkey scripts. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2008-2015 by Xah Lee
+;; Copyright © 2008-2016 by Xah Lee
 
-;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.3.0
+;; Author: Xah Lee ( http://xahlee.info/ )
+;; Version: 1.3.2
 ;; Created: 09 Jan 2010
+;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages
 ;; Homepage: http://xahlee.info/mswin/emacs_autohotkey_mode.html
 
@@ -41,6 +42,9 @@
 
 ;;; HISTORY
 
+;; 2015-05-05 only major change will be logged here.
+
+;; version 1.3.2, 2016-12-18 turned on lexical-binding
 ;; version 1.3.0, 2015-05-04 major refactor. Submit to MELPA.
 ;; version 1.2.2, 2012-05-21 modified syntax table so “_” is part of word.
 ;; version 1.2.1, 2011-10-15 Minor changes. No visible behavior change.
@@ -53,7 +57,7 @@
 (require 'thingatpt )
 
 (defconst xahk-mode-version "")
-(setq xahk-mode-version "1.3.0")
+(setq xahk-mode-version "1.3.2")
 
 (defgroup xahk-mode nil
   "Major mode for editing AutoHotkey script."
@@ -80,7 +84,6 @@
   (setq xahk-mode-map (make-sparse-keymap))
   (define-key xahk-mode-map (kbd "C-c C-r") 'xahk-lookup-ahk-ref)
   (define-key xahk-mode-map (kbd "M-TAB") 'xahk-complete-symbol)
-  (define-key xahk-mode-map (kbd "TAB") 'xahk-complete-symbol)
   (define-key xahk-mode-map [remap comment-dwim] 'xahk-comment-dwim)
 
   (define-key xahk-mode-map [menu-bar] (make-sparse-keymap))
