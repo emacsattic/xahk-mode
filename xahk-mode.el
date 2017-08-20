@@ -3,13 +3,13 @@
 ;; Copyright © 2008-2016 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 1.4.0
+;; Version: 1.4.1
 ;; Created: 09 Jan 2010
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages
 ;; Homepage: http://xahlee.info/mswin/emacs_autohotkey_mode.html
 
-;; You can redistribute this program and/or modify it. Please give credit and link. Thanks.
+;; You can redistribute this program and/or modify it under the terms of the GNU General Public License version 3.
 
 ;;; Commentary:
 
