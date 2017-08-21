@@ -7,9 +7,8 @@
 ;; Created: 09 Jan 2010
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages
+;; License: GPL v3
 ;; Homepage: http://xahlee.info/mswin/emacs_autohotkey_mode.html
-
-;; You can redistribute this program and/or modify it under the terms of the GNU General Public License version 3.
 
 ;;; Commentary:
 
